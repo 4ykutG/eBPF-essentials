@@ -1,0 +1,19 @@
+# 1 VERİ ALMA FONKSİYONLARI
+
+bpf_get_current_comm(&comm, sizeof(comm))
+çalışan programın ismini alır (ls,pwd,bash gibi)
+
+bpf_get_current_pid_tgid()
+programın kimlik numarasını öğrenen sorgudur. Gelen verinin ilk 32 biti process ID'dir.
+
+bpf_get_current_uid_gid()
+işlemi yapan kullanıcının root olup olmadığı bilgisini verir.
+
+# 2 DIŞARIYA BİLGİ VERME FONKSİYONLARI
+
+bpf_trace_printk()
+kernel' in ortak panosuna trace_pipe mesajı bırakır. Hata ayıklarken kullanılır
+Büyük ölçekli projelerde yavaş kalabilir.
+
+perf_submit(ctx, &veri, sizeoff(veri))
+Veriyi paketler ve çok hızlı bir şekilde python taraflı "Perf Buffer" çekmecesine fırlatır.
