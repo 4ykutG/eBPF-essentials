@@ -1,0 +1,12 @@
+xdp unload code:
+sudo xdp-loader unload -a <ağ arayüzü>
+or
+sudo ip link set <> xdpgeneric off
+
+load bpf program:
+sudo xdp-loader load -m skb -s xdp_drop <ağ arayüzü> xdp_drop.o
+
+display status running bpf programs:
+sudo xdp-loader status
+
+

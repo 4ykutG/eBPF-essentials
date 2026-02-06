@@ -9,7 +9,7 @@ int block_icmp_filter(struct xdp_md *ctx) {
     void *data_end = (void *)(long)ctx->data_end;
     void *data = (void *)(long)ctx->data;
 
-    // Ethernet header cast (ethhddr değil ethhdr olacak)
+    // Ethernet header cast 
     struct ethhdr *eth = data;
 
     // Sınır Kontrolü: Paket boyutu ethernet header için yeterli mi?
