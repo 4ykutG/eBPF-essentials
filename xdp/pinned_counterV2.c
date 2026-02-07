@@ -1,18 +1,18 @@
+// drop_ping.c
 #include <linux/bpf.h>
+#include <bpf/bpf_helpers.h>
 #include <linux/if_ether.h>
 #include <linux/ip.h>
-#include <linux/in.h>
-#include <bpf/bpf_helpers.h>
+#include <arpa/inet.h>
 
-// Sayacı saklamak için bir BPF Map tanımlıyoruz
 struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY); // Dizi tipinde bir map
-    __uint(max_entries, 1);           // Sadece 1 tane sayaç tutacağız
-    __type(key, __u32);               // Anahtar tipi (0. index)
-    __type(value, __u64);             // Değer tipi (64-bit sayaç)
+    __uint(type, BPF_MAP_TYPE_ARRAY);
+    __uint(max_entries, 1);
+    __type(key, __u32);
+    __type(value, __u64);
 } drop_stats SEC(".maps");
 
-SEC("xdp_drop_counter")
+SEC("xdp")
 int xdp_drop_google_dns(struct xdp_md *ctx) {
     void *data_end = (void *)(long)ctx->data_end;
     void *data = (void *)(long)ctx->data;
@@ -25,18 +25,13 @@ int xdp_drop_google_dns(struct xdp_md *ctx) {
     struct iphdr *iph = (void *)(eth + 1);
     if ((void *)(iph + 1) > data_end) return XDP_PASS;
 
-    // Kaynak IP 8.8.8.8 ise
-    if (iph->saddr == __constant_htonl(0x08080808)) {
+    // 8.8.8.8 kontrolü (Little-endian: 0x08080808)
+    if (iph->daddr == inet_addr("8.8.8.8")) {
         __u32 key = 0;
-        __u64 *value;
-
-        // Map içindeki sayacı bul ve artır
-        value = bpf_map_lookup_elem(&drop_stats, &key);
+        __u64 *value = bpf_map_lookup_elem(&drop_stats, &key);
         if (value) {
-            // Atomik olarak artırma (birden fazla CPU çekirdeği çakışmasın diye)
             __sync_fetch_and_add(value, 1);
         }
-
         return XDP_DROP;
     }
 
