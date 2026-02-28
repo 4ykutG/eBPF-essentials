@@ -1,0 +1,14 @@
+primary
+    iint
+    char
+    float
+    double
+    void
+devired
+    array
+    pointer
+    function
+user-defined
+    struct
+    union
+    enum
